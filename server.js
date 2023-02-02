@@ -2,6 +2,7 @@ const express = require('express')
 const { createServer } = require('http')
 const { Server } = require("socket.io");
 
+const port = process.env.PORT || 3000
 
 const app = express()
 
@@ -35,4 +36,6 @@ io.on('connection',socket => {
 
 })
 
-httpServer.listen(3000)
+httpServer.listen(port,()=>{
+  console.log(`running on port ${port}`)
+})
