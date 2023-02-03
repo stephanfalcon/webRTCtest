@@ -1,6 +1,7 @@
 const express = require('express')
 const { createServer } = require('http')
 const { Server } = require("socket.io");
+const {ExpressPeerServer} = require('peer')
 
 const port = process.env.PORT || 3000
 
@@ -8,7 +9,11 @@ const app = express()
 
 const httpServer = createServer(app);
 
-const io = new Server(httpServer, { /* options */ });
+const server = httpServer.listen(port,()=>{
+  console.log(`running on port ${port}`)
+})
+
+const io = new Server(httpServer);
 
 const {v4:uuidv4} = require('uuid')
 
@@ -25,7 +30,9 @@ app.get('/:room',(req,res)=>{
 })
 
 io.on('connection',socket => {
+  console.log("new connection from io")
   socket.on('join-room', (roomId,userId)=>{
+    console.log('user joined room')
     socket.join(roomId)
     socket.to(roomId).emit('user-connected',userId)
     socket.on('disconnect',()=>{
@@ -36,6 +43,6 @@ io.on('connection',socket => {
 
 })
 
-httpServer.listen(port,()=>{
-  console.log(`running on port ${port}`)
-})
+app.use('/peer', ExpressPeerServer(server, {
+	debug: true
+}))
